@@ -1,32 +1,158 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cosmic Moon Tracker 🌙🚀</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Moon Phase Tracker 🚀🌕</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Orbitron', sans-serif;
+      background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+      color: #fff;
+      text-align: center;
+      overflow-x: hidden;
+    }
+    h1 {
+      margin-top: 20px;
+      font-size: 2.5em;
+      color: #00eaff;
+      text-shadow: 0 0 15px #00eaff;
+    }
+    .moon-phase, .future-phases {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      box-shadow: 0 0 20px rgba(0, 234, 255, 0.6);
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 25px;
+      font-size: 1em;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      background: linear-gradient(45deg, #00eaff, #0072ff);
+      color: white;
+      font-weight: bold;
+      text-transform: uppercase;
+      box-shadow: 0 0 20px rgba(0, 234, 255, 0.7);
+      transition: 0.3s;
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 40px rgba(0, 234, 255, 1);
+    }
+    .phase-card {
+      display: inline-block;
+      margin: 15px;
+      padding: 15px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.07);
+      width: 160px;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+    }
+    .phase-card img {
+      width: 80px;
+      height: 80px;
+    }
+    .links {
+      margin-top: 40px;
+      padding: 20px;
+    }
+    .links a {
+      color: #00eaff;
+      margin: 0 15px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    .links a:hover {
+      color: #fff;
+      text-shadow: 0 0 15px #00eaff;
+    }
+    /* Starfield animation */
+    .stars {
+      width: 1px;
+      height: 1px;
+      background: transparent;
+      box-shadow: 1000px 2000px #FFF, 500px 300px #FFF, 1200px 700px #FFF, 300px 1000px #FFF, 700px 1500px #FFF, 400px 200px #FFF, 800px 400px #FFF;
+      animation: animStar 50s linear infinite;
+    }
+    @keyframes animStar {
+      from { transform: translateY(0px); }
+      to { transform: translateY(-2000px); }
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>🌌 Cosmic Moon Tracker 🌙</h1>
-    <p>Track today’s moon phase and explore the next 7 days</p>
-  </header>
+  <div class="stars"></div>
+  <h1>🌌 Moon Phase Tracker 🌕</h1>
+  <div class="moon-phase">
+    <h2>Today’s Moon</h2>
+    <div id="today-phase"></div>
+  </div>
+  <button onclick="showNext7Days()">Next 7 Days →</button>
+  <div class="future-phases" id="future-phases"></div>
 
-  <main>
-    <section id="moon-container"></section>
-    <button id="toggle-btn">🔮 Show Next 7 Days</button>
-  </main>
+  <div class="links">
+    <h3>Explore More 🌠</h3>
+    <a href="https://www.nasa.gov" target="_blank">NASA</a>
+    <a href="https://www.isro.gov.in" target="_blank">ISRO</a>
+    <a href="https://www.esa.int" target="_blank">ESA</a>
+    <a href="https://www.spacex.com" target="_blank">SpaceX</a>
+  </div>
 
-  <footer>
-    <h3>Mission Control Links 🚀</h3>
-    <nav>
-      <a href="https://www.nasa.gov" target="_blank">NASA</a>
-      <a href="https://www.isro.gov.in" target="_blank">ISRO</a>
-      <a href="https://www.esa.int" target="_blank">ESA</a>
-      <a href="https://www.spacex.com" target="_blank">SpaceX</a>
-    </nav>
-  </footer>
+  <script>
+    const phases = [
+      { name: "New Moon", img: "🌑", detail: "Moon is invisible, starting new cycle." },
+      { name: "Waxing Crescent", img: "🌒", detail: "A growing sliver of light, energy building." },
+      { name: "First Quarter", img: "🌓", detail: "Half Moon visible, a time of balance." },
+      { name: "Waxing Gibbous", img: "🌔", detail: "Moon grows brighter, illumination increases." },
+      { name: "Full Moon", img: "🌕", detail: "Moon fully illuminated, peak energy." },
+      { name: "Waning Gibbous", img: "🌖", detail: "Light shrinking, introspection begins." },
+      { name: "Last Quarter", img: "🌗", detail: "Half lit again, release and reflection." },
+      { name: "Waning Crescent", img: "🌘", detail: "Thin crescent before renewal." }
+    ];
 
-  <script src="script.js"></script>
+    function getMoonPhase(date) {
+      const lp = 2551443; // lunar period in seconds
+      const new_moon = new Date(1970, 0, 7, 20, 35, 0);
+      const phase = ((date.getTime() - new_moon.getTime()) / 1000) % lp;
+      const index = Math.floor((phase / lp) * phases.length);
+      return phases[index];
+    }
+
+    function displayToday() {
+      const today = new Date();
+      const phase = getMoonPhase(today);
+      document.getElementById("today-phase").innerHTML = `
+        <div class="phase-card">
+          <div style="font-size:50px">${phase.img}</div>
+          <h3>${phase.name}</h3>
+          <p>${phase.detail}</p>
+        </div>`;
+    }
+
+    function showNext7Days() {
+      const container = document.getElementById("future-phases");
+      container.innerHTML = "";
+      for (let i = 1; i <= 7; i++) {
+        let date = new Date();
+        date.setDate(date.getDate() + i);
+        let phase = getMoonPhase(date);
+        container.innerHTML += `
+          <div class="phase-card">
+            <div style="font-size:40px">${phase.img}</div>
+            <h4>${date.toDateString()}</h4>
+            <p><b>${phase.name}</b></p>
+            <p>${phase.detail}</p>
+          </div>`;
+      }
+    }
+
+    displayToday();
+  </script>
 </body>
 </html>
